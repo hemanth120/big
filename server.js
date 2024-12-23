@@ -43,7 +43,7 @@ let plantData ={
   val1:'',
   val2:''
 }
-const mqttClient = mqtt.connect('http://broker.hivemq.com:1883');
+const mqttClient = mqtt.connect('mqtt://34.29.202.158.com:1883');
 
 mqttClient.on('connect', function () {
   console.log('Connected to broker');
