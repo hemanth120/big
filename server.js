@@ -6,7 +6,7 @@ const WebSocket = require('ws');
 const mqtt = require('mqtt');
 
 const app = express();
-const port = 3001;
+const port = 2000;
 
 const mqttTopics = ['bme680/p1', 'bme680/p2', 'bm680/p3', 'bme680/p4', 'bme680/p5'];
 const mqttTopics1 = ['health/t1', 'health/t2', 'health/t3', 'health/t4'];
