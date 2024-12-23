@@ -6,12 +6,12 @@ const WebSocket = require('ws');
 const mqtt = require('mqtt');
 
 const app = express();
-const port = 2000;
+const port = 3001;
 
 const mqttTopics = ['bme680/p1', 'bme680/p2', 'bm680/p3', 'bme680/p4', 'bme680/p5'];
 const mqttTopics1 = ['health/t1', 'health/t2', 'health/t3', 'health/t4'];
 const watertopics = ['water/a1'];
-
+const planttopics=['plant/p1','plant/p2'];
 
 
 app.use(cors());
@@ -39,7 +39,11 @@ let healthData ={
 let waterData = {
   water1: ''
 }
-const mqttClient = mqtt.connect('mqtt://34.131.184.52:1883');
+let plantData ={
+  val1:'',
+  val2:''
+}
+const mqttClient = mqtt.connect('http://broker.hivemq.com:1883');
 
 mqttClient.on('connect', function () {
   console.log('Connected to broker');
@@ -53,7 +57,9 @@ mqttClient.on('connect', function () {
   watertopics.forEach(topic => {
     mqttClient.subscribe(topic);
   });
-  
+  planttopics.forEach(topic=>{
+     mqttClient.subscribe(topic);
+  })
 
 });
 
@@ -98,6 +104,19 @@ mqttClient.on('message', (topic, message) => {
       });
   }
 });
+mqttClient.on('message', (topic, message) => {
+  const index = planttopics.indexOf(topic);
+  if (index !== -1) {
+      plantData[`val${index + 1}`] = message.toString();
+      console.log(`Received water data Sensor ${index + 1}:, plantData[val${index + 1}]`);
+      wss.clients.forEach(client => {
+          if (client.readyState === WebSocket.OPEN) {
+              client.send(JSON.stringify(plantData));
+          }
+      });
+  }
+});
+
 wss.on('connection', (ws) => {
   console.log('WebSocket connection established');
   ws.send(JSON.stringify({ buttonState }));
@@ -174,6 +193,10 @@ app.get('/healthData', (req, res) => {
 
 app.get('/waterData', (req, res) => {
   res.json(waterData);
+});
+app.get('/plantdata',(req,res)=>
+{
+  res.json(plantdata);
 });
 server.listen(port, () => {
   console.log(`Server is running on port ${port}`);
